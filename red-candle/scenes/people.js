@@ -11,6 +11,9 @@ export const CAST = {
   jithin: { skin: '#c48d68', skinD: '#8a5a40', hair: '#120d0b', hairStyle: 'gelled', beard: 'none', cloth: 'office', c1: '#a9c8e6', c2: '#7fa4c8', lanyard: true, round: 1.08 },
   amma: { skin: '#9c6848', skinD: '#64402c', hair: '#2a2420', hairStyle: 'bun', beard: 'none', cloth: 'saree', c1: '#efe6d0', c2: '#c9a24a', earrings: true, female: true },
   achan: { skin: '#94603f', skinD: '#5e3a26', hair: '#8a8580', hairStyle: 'grey', beard: 'greymous', cloth: 'mundu', c1: '#f1efe8', c2: '#d8d4ca', glasses: true },
+  nikBroken: { skin: '#9a6646', skinD: '#5e3a28', hair: '#120d0b', hairStyle: 'messy', beard: 'full', cloth: 'hoodie', c1: '#2a2a2e', c2: '#1c1c20' },
+  nikHivis: { skin: '#9a6646', skinD: '#5e3a28', hair: '#120d0b', hairStyle: 'wavy', beard: 'trim', cloth: 'hivis', c1: '#2a2a2e', c2: '#e8d21e' },
+  mentor: { skin: '#9a6a4a', skinD: '#603e2a', hair: '#5e5a56', hairStyle: 'gelled', beard: 'none', cloth: 'shirt', c1: '#1c1c20', c2: '#121214' },
   anoop: { skin: '#9a6644', skinD: '#5e3c28', hair: '#140f0c', hairStyle: 'wavy', beard: 'full', cloth: 'jumper', c1: '#6e2232', c2: '#4e1622' },
 };
 
@@ -57,6 +60,10 @@ export function person(R, x, y, s, who, o = {}) {
     R.line(cc => { cc.moveTo(...u(-1.1, .66)); cc.lineTo(...u(.48, 3.18)); }, c.c2, s * .1, { maxR: fine * 1.2 });
   } else if (c.cloth === 'jumper') {
     R.line(cc => { const [a, b] = u(-.3, .24); cc.moveTo(a, b); cc.quadraticCurveTo(x, y + .5 * s, x + .3 * s, y + .24 * s); }, shiftC(c.c1, .72), s * .07, { maxR: fine });
+  } else if (c.cloth === 'hivis') {
+    R.fill(pp([[-.95, .7], [-.22, .3], [-.12, body], [-.98, body]]), shiftC(c.c2, 1.05), { maxR: fr * .6, dir: 90, hgt: 1.1 });
+    R.fill(pp([[.95, .7], [.22, .3], [.12, body], [.98, body]]), shiftC(c.c2, .9), { maxR: fr * .6, dir: 90, hgt: 1.1 });
+    for (const yy of [1.6, 2.3]) R.line(cc => { cc.moveTo(...u(-.96, yy)); cc.lineTo(...u(-.15, yy)); cc.moveTo(...u(.15, yy)); cc.lineTo(...u(.96, yy)); }, '#e8ecf0', s * .1, { maxR: fine, hgt: 1.3 });
   } else if (c.cloth === 'apron') {
     R.fill(pp([[-.55, .9], [.55, .9], [.7, body], [-.7, body]]), c.c2, { maxR: fr * .6, dir: 90 });
     R.line(cc => { cc.moveTo(...u(-.5, .95)); cc.lineTo(...u(-.22, .2)); cc.moveTo(...u(.5, .95)); cc.lineTo(...u(.22, .2)); }, c.c2, s * .06, { maxR: fine });
@@ -84,7 +91,9 @@ export function person(R, x, y, s, who, o = {}) {
   }
   // hair
   const hc = c.hair, hcL = shiftC(c.hair, 1.8);
-  if (c.hairStyle === 'wavy') {
+  if (c.hairStyle === 'messy') {
+    R.fill(cc => { cc.moveTo(...u(hx - .42, -.4)); cc.bezierCurveTo(x + (hx - .62) * s, y - 1.3 * s, x + (hx + .6) * s, y - 1.34 * s, x + (hx + .43) * s, y - .4 * s); cc.quadraticCurveTo(x + (hx + .3) * s, y - .62 * s, x + (hx + .16) * s, y - .6 * s); cc.quadraticCurveTo(x + (hx + .02) * s, y - .7 * s, x + (hx - .12) * s, y - .58 * s); cc.quadraticCurveTo(x + (hx - .3) * s, y - .7 * s, x + (hx - .42) * s, y - .4 * s); cc.closePath(); }, lin(x, y - 1.3 * s, x, y - .5 * s, [[0, hc], [.5, hcL], [1, hc]]), { maxR: fine * 1.8, dir: 'edge', fallback: 60, hgt: 1.3 });
+  } else if (c.hairStyle === 'wavy') {
     R.fill(cc => { cc.moveTo(...u(hx - .39, -.46)); cc.bezierCurveTo(x + (hx - .52) * s, y - 1.2 * s, x + (hx + .52) * s, y - 1.22 * s, x + (hx + .4) * s, y - .46 * s); cc.quadraticCurveTo(x + (hx + .36) * s, y - .68 * s, x + (hx + .2) * s, y - .72 * s); cc.quadraticCurveTo(x + (hx + .08) * s, y - .64 * s, x + (hx - .04) * s, y - .73 * s); cc.quadraticCurveTo(x + (hx - .18) * s, y - .66 * s, x + (hx - .28) * s, y - .72 * s); cc.quadraticCurveTo(x + (hx - .36) * s, y - .66 * s, x + (hx - .39) * s, y - .46 * s); cc.closePath(); }, lin(x, y - 1.1 * s, x, y - .6 * s, [[0, hc], [.5, hcL], [1, hc]]), { maxR: fine * 1.6, dir: 'edge', fallback: 20, hgt: 1.25 });
   } else if (c.hairStyle === 'gelled') {
     R.fill(cc => { cc.moveTo(...u(hx - .38, -.5)); cc.bezierCurveTo(x + (hx - .47) * s, y - 1.18 * s, x + (hx + .47) * s, y - 1.18 * s, x + (hx + .38) * s, y - .52 * s); cc.quadraticCurveTo(x + (hx + .3) * s, y - .8 * s, x + (hx - .1) * s, y - .76 * s); cc.quadraticCurveTo(x + (hx - .3) * s, y - .72 * s, x + (hx - .38) * s, y - .5 * s); cc.closePath(); }, lin(x - .4 * s, 0, x + .4 * s, 0, [[0, hc], [.35, '#3a3230'], [.4, hc], [1, hc]]), { maxR: fine * 1.2, dir: 0, hgt: 1.2 });
