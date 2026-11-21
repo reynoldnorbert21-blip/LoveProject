@@ -1,5 +1,6 @@
 # Loudness master without ffmpeg loudnorm (ffmpeg 6.x mis-reports length through it):
 # measure integrated loudness with ffmpeg's ebur128, set -14 LUFS, oversampled peak limit at -1.2 dBTP, then mux.
+from scipy.ndimage import minimum_filter1d
 import sys, subprocess, re, numpy as np, soundfile as sf, soxr
 wav, video, out = sys.argv[1:4]
 def lufs(path):
@@ -9,9 +10,9 @@ x, sr = sf.read(wav, dtype='float32')
 I, P = lufs(wav); print(f'in: {I:.1f} LUFS, true peak {P:.1f} dBTP')
 for it in range(4):
     y = x * 10 ** ((-14 - I) / 20)
-    up = soxr.resample(y, sr, sr * 4); ceil = 10 ** (-1.4 / 20)
+    up = soxr.resample(y, sr, sr * 4); ceil = 10 ** (-2.4 / 20)
     env = np.maximum(np.abs(up).max(1), 1e-9); g = np.minimum(1, ceil / env)
-    k = 4 * int(.003 * sr); g = np.minimum.reduce([np.roll(g, s) for s in range(-k, k + 1, max(1, k // 8))])   # look-around
+    k = 4 * int(.003 * sr); g = minimum_filter1d(g, 2 * k + 1)   # look-around
     g = np.convolve(g, np.ones(k) / k, 'same'); up = up * g[:, None]
     y = soxr.resample(up, sr * 4, sr).astype(np.float32)
     sf.write('/tmp/_master.wav', y, sr); I2, P2 = lufs('/tmp/_master.wav'); print(f'pass {it}: {I2:.1f} LUFS, {P2:.1f} dBTP')
