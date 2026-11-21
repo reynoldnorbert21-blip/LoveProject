@@ -111,9 +111,9 @@ const SHOTS = {
     const p = plate('bunk'), u = U('bunk', t), cam = camK(u, [[0, [600, 1100, .96]], [.3, [640, 1120, 1.1]], [1, [680, 1140, 1.45]]]);
     drawPlate('bunk', { t, cam });
     const T = TX.bph, x = T.x, w = T.w; x.fillStyle = '#10141e'; x.fillRect(0, 0, w, T.h); x.textAlign = 'center'; x.fillStyle = '#c8d4f0'; x.font = `600 120px ${UI}`; x.fillText('01:47', w / 2, 240);
-    if (t > H_.emailBuzz) { const k = eo(seg(t, H_.emailBuzz, H_.emailBuzz + .4)); x.save(); x.translate(0, (1 - k) * -200); x.fillStyle = '#f4f2ee'; x.beginPath(); x.roundRect(30, 380, w - 60, 520, 30); x.fill();
-      x.fillStyle = '#7a1a14'; x.textAlign = 'left'; x.font = `700 46px ${UI}`; x.fillText('University Finance', 70, 460); x.fillStyle = '#16161a'; x.font = `700 62px ${UI}`; x.fillText('Tuition fee', 70, 590); x.fillText('overdue:', 70, 660);
-      x.fillStyle = '#c81e14'; x.font = `700 110px ${UI}`; x.fillText('£3,200', 70, 800); x.restore(); }
+    if (t > H_.emailBuzz) { const k = eo(seg(t, H_.emailBuzz, H_.emailBuzz + .4)); x.save(); x.translate(0, (1 - k) * -200); x.fillStyle = '#f4f2ee'; x.beginPath(); x.roundRect(22, 320, w - 44, 340, 26); x.fill();
+      x.fillStyle = '#7a1a14'; x.textAlign = 'left'; x.font = `700 30px ${UI}`; x.fillText('University Finance', 48, 368, w - 96); x.fillStyle = '#16161a'; x.font = `700 44px ${UI}`; x.fillText('Tuition fee', 48, 440, w - 96); x.fillText('overdue', 48, 492, w - 96);
+      x.fillStyle = '#c81e14'; x.font = `700 84px ${UI}`; x.fillText('£3,200', 48, 610, w - 96); x.restore(); }
     screen(T, p.a.screen, { cam, t });
     return { post: { expo: 1.02, lift: [.015, .01, .02] } };
   },
