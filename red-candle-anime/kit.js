@@ -91,10 +91,10 @@ export function chrome(g, e, text, x, y, size, o = {}) {   // heavy italic chrom
   const top = y - size * .78, gr = g.createLinearGradient(0, top, 0, y + size * .05);
   const C = o.cols || [[0, '#8fd8ff'], [.46, '#ffffff'], [.5, '#3a2a6a'], [.68, '#c04a9a'], [.86, '#ff9a6a'], [1, '#ffe08a']];
   for (const [k, c] of C) gr.addColorStop(k, c);
-  g.strokeStyle = o.neon || '#ff3a6a'; g.lineWidth = size * .16; g.strokeText(text, x, y);
+  g.strokeStyle = o.neon || '#ff3a6a'; g.lineWidth = size * .13; g.strokeText(text, x, y);
   g.strokeStyle = '#120818'; g.lineWidth = size * .09; g.strokeText(text, x, y);
   g.fillStyle = gr; g.fillText(text, x, y); g.restore();
-  if (e) { e.save(); e.font = `italic 900 ${size}px Kanit`; e.textAlign = o.align || 'center'; e.lineJoin = 'round'; e.strokeStyle = o.neon || '#ff3a6a'; e.lineWidth = size * .2; e.globalAlpha = o.ga ?? .9; e.strokeText(text, x, y); e.fillStyle = rgba('#ffffff', .3); e.fillText(text, x, y); e.restore(); }
+  if (e) { e.save(); e.font = `italic 900 ${size}px Kanit`; e.textAlign = o.align || 'center'; e.lineJoin = 'round'; e.strokeStyle = o.neon || '#ff3a6a'; e.lineWidth = size * .14; e.globalAlpha = o.ga ?? .55; e.strokeText(text, x, y); e.restore(); }
 }
 // small caption card on the tape (place / time cards)
 export function caption(g, e, text, y, k = 1, o = {}) {

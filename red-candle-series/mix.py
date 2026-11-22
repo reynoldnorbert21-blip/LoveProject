@@ -4,7 +4,7 @@ import os, sys, json, numpy as np, soundfile as sf
 HERE = os.path.dirname(os.path.abspath(__file__)); LIB = os.environ.get('LIB', '/home/user/lemomo-ai/lemo-opuscar'); sys.path.insert(0, LIB)
 from core.audio import sampler as S
 from core.audio.sfx import SR, add, limit, compress, noise, brown, bp, lp, hp, click, clack, whoosh, thump, ding, heartbeat, t_
-EP = int(sys.argv[1]); NOMUSIC = '--nomusic' in sys.argv
+EP = int(sys.argv[1]); NOMUSIC = '--nomusic' in sys.argv; SONGS = '--songs' in sys.argv; ANIME = '--anime' in sys.argv
 ev = json.load(open(f'{HERE}/out/events-ep{EP}.json')); DUR = ev['dur']; N = int(DUR * SR) + SR
 HIT = {e['type']: e['t'] for e in ev['ev'] if e['type'] not in ('cut', 'line')}
 C = {e['id']: e['t'] for e in ev['ev'] if e['type'] == 'cut'}; LINES = [e for e in ev['ev'] if e['type'] == 'line']
@@ -129,7 +129,7 @@ music = S.room(S.render(m, dur=N / SR, master=False).astype(np.float32), size=.5
 # ======================= SOUND DESIGN =======================
 fx = st(); amb = st()
 for k, v in C.items():
-    if v > 0 and k not in ('brand',): add(fx, scrape(.55), v - .02, .2, rng.uniform(-.3, .3))       # the knife lays every new shot
+    if v > 0 and k not in ('brand',) and not ANIME: add(fx, scrape(.55), v - .02, .2, rng.uniform(-.3, .3))       # the knife lays every new shot (painted version only)
 def has(k): return k in C
 if EP == 1:
     a, b = span('cold'); amb += bed(lp(rainbed(span('face')[1]), 2500), 0, span('face')[1], .35)
@@ -200,9 +200,34 @@ for L in LINES:
     if L['id'] in PHONE: x = (bp(x, 300, 3400) * 1.5).astype(np.float32)
     add(voice, x.astype(np.float32), L['t'], 1., 0.); duck[int((L['t'] - .15) * SR):int((L['t'] + len(x) / SR + .25) * SR)] = 1
 k = int(.12 * SR); duck = np.convolve(duck, np.ones(k) / k, 'same'); g = (1 - duck * (1 - 10 ** (-8 / 20)))[:, None].astype(np.float32)
-mix = (0 if NOMUSIC else music * .55 * g) + amb * g + fx * (1 - duck[:, None] * .3) + voice
+# ======================= SONGS (the user's tracks, placed by situation) =======================
+# cue: (file, offset into the track, t0, t1, gain, fade in, fade out) — t0/t1 are shot names or HIT keys or seconds; the score is muted under each cue
+def T(v): return v if isinstance(v, (int, float)) else (HIT[v] if v in HIT else C[v])
+CUES = {
+  1: [('Alaakaa_Loova', 0.0, 0.0, 'home', .9, .05, 1.2),                      # cold open + title: the dark build
+      ('Apna_Friday_Aayega', 14.0, 'office', 'resign', .8, 1.5, 1.6)],       # IT job, the pub, first profits
+  2: [('Apna_Friday_Aayega_House_Mix', 0.0, 9.36, 'loss', .85, 2.0, .05),     # Onam with the boys -> the drop lands on the first transfer; cut dead at the first loss
+      ('Alaakaa_Loova', 8.0, 'loss', 'margin', .8, .4, .3)],                 # loss, revenge trades, loan, the spiral
+  3: [('Blud_Is_On_His_Way', 10.0, 'audit', 'arrivals', .95, 1.0, 3.5),       # reads his trades -> hit on the comeback -> payout -> repays everyone
+      ('GOAT_Song', 0.0, 'end', 99.0, .8, .3, 1.5)],                         # last line, RED CANDLE, MeowXTrader
+}[EP]
+songs = st(); smask = np.ones(N, np.float32)
+if SONGS:
+    import soxr
+    for f, off, a, b, gain, fi, fo in CUES:
+        a, b = T(a), min(T(b), DUR); x, sr = sf.read(f"{HERE}/music-user/{f}.mp3", dtype='float32', always_2d=True)
+        if sr != SR: x = soxr.resample(x, sr, SR).astype(np.float32)
+        if x.shape[1] == 1: x = np.repeat(x, 2, 1)
+        x = x[int(off * SR):int((off + b - a) * SR)]; n = len(x)
+        x = x / (np.sqrt(np.mean(x ** 2)) + 1e-9) * .075 * gain                     # level-match every track
+        env = np.ones(n, np.float32); i, o = max(1, int(fi * SR)), max(1, int(fo * SR)); env[:i] = np.linspace(0, 1, i); env[-o:] *= np.linspace(1, 0, o)
+        s0 = int(a * SR); n = min(n, N - s0); songs[s0:s0 + n] += (x[:n] * env[:n, None]).astype(np.float32)
+        i0, i1 = int(a * SR), int((a + n / SR) * SR); xf = int(.6 * SR)
+        smask[i0:i1] = 0; smask[max(0, i0 - xf):i0] = np.minimum(smask[max(0, i0 - xf):i0], np.linspace(1, 0, i0 - max(0, i0 - xf))); smask[i1:i1 + xf] = np.minimum(smask[i1:i1 + xf], np.linspace(0, 1, len(smask[i1:i1 + xf])))
+    gs = (1 - duck * (1 - 10 ** (-13 / 20)))[:, None].astype(np.float32)           # songs carry vocals: duck deeper under the Malayalam dialogue
+mix = (0 if NOMUSIC else music * .55 * g * smask[:, None] + (songs * gs if SONGS else 0)) + amb * g + fx * (1 - duck[:, None] * .3) + voice
 for a, b in SIL: i0, i1 = int(a * SR), int(b * SR); mix[i0:i1] = 0; f = int(.08 * SR); mix[i0 - f:i0] *= np.linspace(1, 0, f)[:, None]
 mix = mix[:int(DUR * SR)]; fo = int(1.6 * SR); mix[-fo:] *= np.linspace(1, 0, fo)[:, None]
 mix = limit(mix.astype(np.float32), .9); os.makedirs(f'{HERE}/out', exist_ok=True)
-name = f"{HERE}/out/mix-ep{EP}{'-nomusic' if NOMUSIC else ''}.wav"; sf.write(name, mix, SR)
+name = f"{HERE}/out/mix-ep{EP}{'-anime' if ANIME else ''}{'-songs' if SONGS else ''}{'-nomusic' if NOMUSIC else ''}.wav"; sf.write(name, mix, SR)
 print(name, f'{DUR:.1f}s', 'instruments', sorted({e[1] for e in m}))

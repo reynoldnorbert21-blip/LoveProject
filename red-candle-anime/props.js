@@ -89,11 +89,15 @@ export function mug(g, x, y, s, col = '#c84a2a') {
   g.strokeStyle = mix(col, '#000000', .7); g.lineWidth = 12; g.beginPath(); g.arc(46, 0, 22, -1.3, 1.3); g.stroke(); g.strokeStyle = col; g.lineWidth = 7; g.stroke();
   g.restore();
 }
-// hand pressing a phone to the ear (for a bust in 3/4 facing right, local head units)
+// hand pressing a phone to the ear (bust in 3/4 facing right, local head units): upper arm down, elbow out, forearm up to the ear
 export function phoneAtEar(g, P) {
-  cel(g, poly([[-96, -10], [-62, -26], [-34, 70], [-70, 84]]), { f: '#22222c', s: '#121218', so: [-4, -3], l: '#050508', lw: 2 });
-  cel(g, [[-110, 40], [-74, 10], [-50, 60], [-60, 130], [-150, 330], [-210, 320]], { f: P.skin.f, s: P.skin.s, so: [-8, -6], l: P.skin.l, lw: 2 });
-  cel(g, [[-200, 330], [-140, 250], [-80, 360], [-160, 420]], { f: P.cloth.f, s: P.cloth.s, so: [-8, -6], l: P.cloth.l, lw: 2 });
+  const cl = P.cloth, sk = P.skin;
+  cel(g, poly([[-92, -6], [-60, -18], [-44, 70], [-76, 82]]), { f: '#22222c', s: '#121218', so: [-4, -3], l: '#050508', lw: 2 });
+  cel(g, [[-178, 190], [-136, 170], [-150, 250], [-200, 360], [-250, 350], [-230, 260]], { f: cl.f, s: cl.s, so: [-10, -6], l: cl.l, lw: 2.2 });            // upper arm
+  cel(g, [[-250, 350], [-200, 360], [-150, 250], [-104, 120], [-130, 96], [-176, 220]], { f: cl.f, s: cl.s, so: [-8, -6], h: cl.h, ho: [4, 3], l: cl.l, lw: 2.2 });   // forearm up
+  cel(g, [[-134, 104], [-104, 120], [-96, 106], [-120, 92]], { f: cl.s, l: cl.l, lw: 1.6 });                                                            // cuff
+  const hd = new Path2D(); hd.ellipse(-100, 66, 26, 38, -.3, 0, TAU); cel(g, hd, { f: sk.f, s: sk.s, so: [-6, -4], h: sk.h, ho: [3, 3], l: sk.l, lw: 1.8 });
+  for (let k = 0; k < 3; k++) line(g, [[-118 + k * 6, 40 + k * 14], [-84 + k * 4, 34 + k * 14]], sk.l, 1.1);
 }
 export function steam(g, x, y, t, n = 8, a = .22) {
   for (let i = 0; i < n; i++) { const life = 2.6 + hash(i) * 1.6, ph = ((t + hash(i * 2.2) * life) % life) / life, px = x + (hash(i * 3.3) - .5) * 260 + Math.sin(ph * 5 + i) * 40, py = y - ph * 700;
